@@ -1,4 +1,21 @@
 
+
+**Table of Contents**
+
+- [UIAction](#)
+	- [LoginAction](#)
+	- [LogoutAction](#)
+	- [SentaClienteAction](#)
+- [RestaurantOperationService](#)
+	- [getMesasPara(pessoas: int)](#)
+	- [sentaCliente(mesa: Mesa)](#)
+- [Database](#)
+	- [getTurnoAtual](#)
+	- [getFuncionario(ID: String)](#)
+- [Turno](#)
+	- [sentaCliente(mesa:Mesa)](#)
+
+
 ##UIAction
 
 Cada ação é associada a um *UIAction*, que possui um método abstrato *execute* a ser chamado, sem parâmetros. Todos os dados necessários para efetuar a ação (mesa, item pedido, etc.) devem ser obtidos na chamada do *execute*.
