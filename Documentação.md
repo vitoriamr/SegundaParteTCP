@@ -2,18 +2,18 @@
 
 **Table of Contents**
 
-- [UIAction](#)
-	- [LoginAction](#)
-	- [LogoutAction](#)
-	- [SentaClienteAction](#)
-- [RestaurantOperationService](#)
-	- [getMesasPara(pessoas: int)](#)
-	- [sentaCliente(mesa: Mesa)](#)
-- [Database](#)
-	- [getTurnoAtual](#)
-	- [getFuncionario(ID: String)](#)
-- [Turno](#)
-	- [sentaCliente(mesa:Mesa)](#)
+- [UIAction](#UIAction)
+	- [LoginAction](#loginaction)
+	- [LogoutAction](#logoutaction)
+	- [SentaClienteAction](#sentaclienteaction)
+- [RestaurantOperationService](#restaurantoperationservice)
+	- [getMesasPara(pessoas: int)](#getmesasparapessoas-int)
+	- [sentaCliente(mesa: Mesa)](#sentaclientemesa-mesa)
+- [Database](#database)
+	- [getTurnoAtual](#getturnoatual)
+	- [getFuncionario(ID: String)](#getfuncionarioid-string)
+- [Turno](#turno)
+	- [sentaCliente(mesa:Mesa)](#sentaclientemesa-Mesa)
 
 
 ##UIAction
