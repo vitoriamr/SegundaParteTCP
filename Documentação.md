@@ -24,6 +24,7 @@
 	- [getFuncionario(ID: String)](#getfuncionarioid-string)
 	- [getMesas](#getmesas)
 - [Turno](#turno)
+	- [getMesasLivres](#getmesaslivres)
 	- [sentaCliente(mesa: Mesa)](#sentaclientemesa-mesa)
 	- [getReservas](#getreservas-1)
 	- [reservaMesa(mesa: Mesa, horario: Time)](#reversamesamesa-mesa-horario-time-1)
@@ -175,6 +176,13 @@ Existem 3 estados principais em que uma mesa pode estar, com um deles sendo queb
 Para isso, são feitas duas listas e um mapa em cada *Turno*, e cada *Mesa* deve estar em exatamente uma dessas 3 coleções. As duas listas ,*mesasLivres* e *mesasALimpar*, representam as mesas livres e sujas, respectivamente. 
 
 Para representar as mesas ocupadas, é usado um mapa, com a mesa sendo a chave e o pedido da mesa sendo o valor. Para as mesas que ainda não fizeram o pedido, o valor ligado a ela será nulo, e assim sua identificação será fácil de ser feita. 
+
+### getMesasLivres
+
+1. Primeiro, começamos com a lista de mesas livres, mas estas não estão todas disponíveis para serem ocupadas.
+2. Para cada reserva no sistema que está num futuro próximo (desde agora até x horas), removemos a mesa da lista de retorno. 
+3. Se for encontrada uma reserva que já está expirada (horário é meia hora atrás), essa reserva é cancelada e removida da lista de reservas.
+4. A lista de mesas alterada é retornada.
 
 ### sentaCliente(mesa:Mesa)
 
