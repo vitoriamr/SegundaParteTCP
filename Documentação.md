@@ -6,31 +6,14 @@
 	- [LoginAction](#loginaction)
 	- [LogoutAction](#logoutaction)
 	- [SentaClienteAction](#sentaclienteaction)
-	- [ReservarMesaAction](#reservarmesaaction)
-	- [CancelaReservaAction](#cancelareservaaction)
-	- [VisualizaMesasSujasAction](#visualizamesassujasaction)
-	- [LiberaMesaAction](#liberamesaaction)
 - [RestaurantOperationService](#restaurantoperationservice)
 	- [getMesasPara(pessoas: int)](#getmesasparapessoas-int)
 	- [sentaCliente(mesa: Mesa)](#sentaclientemesa-mesa)
-	- [getMesasDisponiveis(horario: Time)](#getmesasdisponiveishorario-time)
-	- [reservaMesa(mesa: Mesa, horario: Time)](#reversamesamesa-mesa-horario-time)
-	- [getMesasSujas](#getmesassujas)
-	- [liberaMesa(mesa: Mesa)](#liberamesamesa-mesa)
-	- [getReservas](#getreservas)
-	- [cancelaReserva(reserva: Reserva)](#cancelareservareserva-reserva)
 - [Database](#database)
 	- [getTurnoAtual](#getturnoatual)
 	- [getFuncionario(ID: String)](#getfuncionarioid-string)
-	- [getMesas](#getmesas)
 - [Turno](#turno)
-	- [getMesasLivres](#getmesaslivres)
-	- [sentaCliente(mesa: Mesa)](#sentaclientemesa-mesa)
-	- [getReservas](#getreservas-1)
-	- [reservaMesa(mesa: Mesa, horario: Time)](#reversamesamesa-mesa-horario-time-1)
-	- [cancelaReserva(reserva: Reserva)](#cancelareservareserva-reserva-1)
-	- [getMesasSujas](#getmesassujas-1)
-	- [liberaMesa(mesa: Mesa)](#liberamesamesa-mesa-1)
+	- [sentaCliente(mesa:Mesa)](#sentaclientemesa-Mesa)
 
 
 ##UIAction
@@ -92,6 +75,14 @@ Inicialmente o atendente pede a lista de mesas sujas, em seu turno, e verifica a
 
 Após esta verificação, a mesa limpa é marcada como disponível.
 
+### IniciarPreparacaoAction
+
+Essa ação é usada pelo cozinheiro quando ele quer começar a preparação de novos itens/pedidos. Ele vê no sistema quais são os itens que ainda não foram atendidos, e então decide qual começar. Ele então informa ao sistema qual o pedido iniciado, além de quais itens ele iniciou (não é necessário iniciar a preparação de todos os itens de um pedido de uma vez).
+
+O fluxo de dados é informado abaixo:
+1. A lista de pedidos que ainda não foram preparados é pedida e mostrada ao ao sistema.
+2. O usuário escolhe o pedido desejado, e, dentro desse pedido, quais itens ainda não preparados ele deseja preparar.
+3. O sistema é informado sobre essas mudanças, e os ingredientes são removidos da despensa.
 
 ## RestaurantOperationService
 
@@ -165,7 +156,7 @@ Guarda todas as informações relacionadas a um turno específico, como a situa�
 
 Como cada instância de *Mesa* guarda apenas as informações permanentes dela (a capacidade), o estado atual dela precisa ser armazenado de alguma forma em cada *Turno*. Para isso, a solução pensada foi representar o estado dela pela presença ou não da mesa em uma lista.
 
-Existem 3 estados principais em que uma mesa pode estar, com um deles sendo quebrado em dois sub-estados. São eles:
+Existem 3 estados principais em que uma mesa pode estar. com um deles sendo quebrado em dois sub-estados. São eles:
 
 * Livre
 * Suja 
@@ -176,13 +167,6 @@ Existem 3 estados principais em que uma mesa pode estar, com um deles sendo queb
 Para isso, são feitas duas listas e um mapa em cada *Turno*, e cada *Mesa* deve estar em exatamente uma dessas 3 coleções. As duas listas ,*mesasLivres* e *mesasALimpar*, representam as mesas livres e sujas, respectivamente. 
 
 Para representar as mesas ocupadas, é usado um mapa, com a mesa sendo a chave e o pedido da mesa sendo o valor. Para as mesas que ainda não fizeram o pedido, o valor ligado a ela será nulo, e assim sua identificação será fácil de ser feita. 
-
-### getMesasLivres
-
-1. Primeiro, começamos com a lista de mesas livres, mas estas não estão todas disponíveis para serem ocupadas.
-2. Para cada reserva no sistema que está num futuro próximo (desde agora até x horas), removemos a mesa da lista de retorno. 
-3. Se for encontrada uma reserva que já está expirada (horário é meia hora atrás), essa reserva é cancelada e removida da lista de reservas.
-4. A lista de mesas alterada é retornada.
 
 ### sentaCliente(mesa:Mesa)
 
@@ -208,3 +192,24 @@ Retorna a lista de todas as mesas sujas do restaurante.
 ###liberaMesa(mesa: Mesa)
 
 Remove da lista de mesas sujas e acrescenta nas mesas disponíveis para uso.
+
+###getPedidosPendentes
+
+Retorna a lista de pedidos pendentes do turno
+
+###movePedidoParaPreparacao(pedido: Pedido)
+
+Move o pedido da lista de pedidos pendentes para a lista de pedidos em preparação do turno.
+
+
+###atualizarItens(itens: List<Item>)
+
+Faz a atualização da dispensa do turno removendo os ingredientes utilizados para a preparação dos itens informados na lista dada como parâmetro.
+
+## Pedido
+
+Guarda as informações sobre o pedido de uma mesa. Uma mesa não pode conter mais de um pedido. Ele contém uma lista de itens pendentes, que ainda não iniciaram sua preparação, uma lista de itens em preparação e uma lista de itens prontos, itens que já podem ser servidos. 
+
+###moveItensParaPreparacao(item: List<Item>)
+
+Move lista de itens recebida para lista de itens em preparação.
