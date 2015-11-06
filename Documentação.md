@@ -2,18 +2,59 @@
 
 **Table of Contents**
 
-- [UIAction](#UIAction)
-	- [LoginAction](#loginaction)
-	- [LogoutAction](#logoutaction)
-	- [SentaClienteAction](#sentaclienteaction)
-- [RestaurantOperationService](#restaurantoperationservice)
-	- [getMesasPara(pessoas: int)](#getmesasparapessoas-int)
-	- [sentaCliente(mesa: Mesa)](#sentaclientemesa-mesa)
-- [Database](#database)
-	- [getTurnoAtual](#getturnoatual)
-	- [getFuncionario(ID: String)](#getfuncionarioid-string)
-- [Turno](#turno)
-	- [sentaCliente(mesa:Mesa)](#sentaclientemesa-Mesa)
+<!-- Ignorem o HTML embaixo. Ele serve para fazer a tabela de conteúdos -->
+
+<p><div class="toc">
+<ul>
+<li><a href="#uiaction">UIAction</a><ul>
+<li><a href="#loginaction">LoginAction</a></li>
+<li><a href="#logoutaction">LogoutAction</a></li>
+<li><a href="#sentaclienteaction">SentaClienteAction</a></li>
+<li><a href="#reservarmesaaction">ReservarMesaAction</a></li>
+<li><a href="#cancelareservaaction">CancelaReservaAction</a></li>
+<li><a href="#visualizamesassujasaction">VisualizaMesasSujasAction</a></li>
+<li><a href="#liberamesaaction">LiberaMesaAction</a></li>
+<li><a href="#iniciarpreparacaoaction">IniciarPreparacaoAction</a></li>
+</ul>
+</li>
+<li><a href="#restaurantoperationservice">RestaurantOperationService</a><ul>
+<li><a href="#getmesasparapessoas-int">getMesasPara(pessoas: int)</a></li>
+<li><a href="#sentaclientemesa-mesa">sentaCliente(mesa: Mesa)</a></li>
+<li><a href="#getmesassemreserva">getMesasSemReserva</a></li>
+<li><a href="#reservamesamesa-mesa-horario-time">reservaMesa(mesa: Mesa, horario: Time)</a></li>
+<li><a href="#cancelareservamesa-mesa">cancelaReserva(mesa: Mesa)</a></li>
+<li><a href="#getmesassujas">getMesasSujas</a></li>
+<li><a href="#liberamesamesa-mesa">liberaMesa(mesa: Mesa)</a></li>
+</ul>
+</li>
+<li><a href="#database">Database</a><ul>
+<li><a href="#hasturnoativo">hasTurnoAtivo</a></li>
+<li><a href="#getturnoativo">getTurnoAtivo</a></li>
+<li><a href="#getfuncionarioid-string">getFuncionario(ID: String)</a></li>
+<li><a href="#getmesas">getMesas</a></li>
+<li><a href="#atualizadespensaitensaremover-list">atualizaDespensa(itensARemover: List)</a></li>
+</ul>
+</li>
+<li><a href="#turno">Turno</a><ul>
+<li><a href="#sentaclientemesamesa">sentaCliente(mesa:Mesa)</a></li>
+<li><a href="#getpedidos">getPedidos</a></li>
+<li><a href="#addcustocusto-double">addCusto(custo: double)</a></li>
+</ul>
+</li>
+<li><a href="#pedido">Pedido</a></li>
+<li><a href="#item">Item</a></li>
+<li><a href="#receita">Receita</a></li>
+<li><a href="#ingrediente">Ingrediente</a></li>
+<li><a href="#mesa">Mesa</a><ul>
+<li><a href="#desocupa">desocupa</a></li>
+<li><a href="#isdisponível">isDisponível</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</p>
 
 
 ##UIAction
@@ -45,44 +86,47 @@ Essa *UIAction* se refere à ação de sentar um cliente novo em uma mesa dispon
 
 O fluxo de dados é bem simples, quando existe um turno ativo:
 
-* Primeiro, o atendente informa quantas pessoas querem ser sentadas, e faz uma chamada para *RestaurantOperationService* para obter as mesas disponíveis no turno atual que comportam essa quantidade de pessoas.
+* Primeiro, o atendente informa quantas pessoas querem ser sentadas, e faz uma chamada para *RestaurantOperationService* para obter as mesas disponíveis que comportam essa quantidade de pessoas.
+* Caso não haja um turno ativo no momento, é jogada uma exceção pelo *RestaurantOperationService*, que deve ser tratada por essa classe.
 * Depois, as mesas válidas são mostradas, para uma ser escolhida.
-* Quando a mesa desejada é escolhida, é informado ao *RestaurantOperationService* que um novo cliente foi sentado na mesa, e ela é removida da lista de mesas disponíveis.
+* Quando a mesa desejada é escolhida, é informado ao *RestaurantOperationService* que um novo cliente foi sentado na mesa, e eu estado é mudado para ocupada.
 
 ### ReservarMesaAction
 
 *ReservarMesaAction* é chamada quando um atendente deseja reservar uma mesa para determinado horário.
 
-O atendente busca todas as mesas disponíveis para este horário, que são mostradas e aquela que for escolhida será marcada como "reservada".
+O atendente busca todas as mesas que não possuem reserva, que são mostradas e aquela que for escolhida será marcada como "reservada".
 
 ### CancelaReservaAction
 
 É chamada pelo atendente para cancelar reservas que já haviam sido feitas.
 
-As reservas existentes são mostradas no sistema e, a partir destas, o atendente cancela a reserva escolhida.
+Todas as mesas são mostradas no sistema e, a partir destas, o atendente cancela a reserva escolhida.
 
 ### VisualizaMesasSujasAction
 
 É utilizada pelo auxiliar de limpeza para verificar quais mesas precisam ser limpas.
 
-Recebe todas as mesas sujas de um determinado turno e as mostra no sistema.
+Recebe todas as mesas sujas e as mostra no sistema.
 
 ### LiberaMesaAction
 
 O atendente informa ao sistema as mesas liberadas para uso. 
 
-Inicialmente o atendente pede a lista de mesas sujas, em seu turno, e verifica as que ele já limpou.
+Inicialmente o atendente pede a lista de mesas sujas e verifica as que ele já limpou.
 
-Após esta verificação, a mesa limpa é marcada como disponível.
+Após esta verificação, a mesa é marcada como limpa.
 
 ### IniciarPreparacaoAction
 
 Essa ação é usada pelo cozinheiro quando ele quer começar a preparação de novos itens/pedidos. Ele vê no sistema quais são os itens que ainda não foram atendidos, e então decide qual começar. Ele então informa ao sistema qual o pedido iniciado, além de quais itens ele iniciou (não é necessário iniciar a preparação de todos os itens de um pedido de uma vez).
 
 O fluxo de dados é informado abaixo:
-1. A lista de pedidos que ainda não foram preparados é pedida e mostrada ao ao sistema.
+1. A lista de pedidos que ainda não foram preparados é pedida e mostrada pelo sistema.
 2. O usuário escolhe o pedido desejado, e, dentro desse pedido, quais itens ainda não preparados ele deseja preparar.
-3. O sistema é informado sobre essas mudanças, e os ingredientes são removidos da despensa.
+3. O sistema é informado sobre essas mudanças, e o pedido e itens são colocados em preparação.
+
+*Sugestão de implementação:* para a escolha dos itens, primeiro mostre todos os pedidos pendentes para o usuário. Depois, quando ele escolher qual pedido vai preparar, mostre quais os itens desse pedido que estão pendentes. Assim, fica fácil criar os parâmetros necessários para a chamada de método de *RestaurantOperationService*. 
 
 ## RestaurantOperationService
 
@@ -90,57 +134,51 @@ Gerencia a comunicação entre as ações, que lidam com a obtenção e display 
 
 ### getMesasPara(pessoas: int)
 
-* Pede o turno ativo ao banco de dados;
-* Do turno ativo, pega quais são as mesas disponíveis
-* Filtra as mesas para apenas as que suportam *pessoas* ou mais
+* Vê com o banco de dados se existe um turno ativo. Se não, joga uma exceção, pois não faz sentido pedir uma mesa para sentar clientes quando o restaurante não está aberto;
+* Pega as mesas existentes do banco de dados;
+* Filtra as mesas para apenas as que suportam *pessoas* ou mais e que estão disponíveis agora;
 * Retorna essa lista de mesas filtradas.
 
 ### sentaCliente(mesa: Mesa)
 
 * Pede o turno ativo ao banco de dados;
-* Avisa ao turno ativo que *mesa* foi ocupada, e deve ser removida da lista de mesas disponíveis.
+* Avisa ao turno ativo que *mesa* foi ocupada, e muda o estado de mesa para ocupada.
 
-### getMesasDisponiveis(horario: Time)
+### getMesasSemReserva
 
-* Pede o turno ativo ao banco de dados;
-* Obtém uma lista de todas as mesas existentes através do turno;
-* Obtém todas as reservas deste turno;
-* Retorna todas as mesas que não possuem uma reserva equivalente em tal horário;
+* Obtém uma lista de todas as mesas existentes através banco de dados;
+* Retorna todas as mesas que não possuem uma reserva;
 
 ### reservaMesa(mesa: Mesa, horario: Time)
 
-* Pede o turno ativo ao banco de dados;
-* Avisa ao turno ativo que *mesa* foi reservada naquele horário.
+* Avisa à *mesa* que ela foi reservada naquele horário.
+
+### cancelaReserva(mesa: Mesa)
+
+* Informa à *mesa* que seu horário de reserva é nulo.
 
 ### getMesasSujas
 
-* Pede o turno ativo ao banco de dados;
-* Obtém uma lista de todas as mesas sujas do restaurante, no turno.
+* Pede a lista de mesas ao banco de dados;
+* Retorna a lista de mesas filtrada para isSuja() == true
 
 ### liberaMesa(mesa: Mesa)
 
-* Pede o turno ativo ao banco de dados;
-* Informa ao turno que *mesa* foi liberada para uso.
-
-### getReservas
-
-* Pede o turno ativo ao banco de dados;
-* Obtém todas as reservas feitas naquele turno.
-
-### cancelaReserva(reserva: Reserva)
-
-* Pede o turno ativo ao banco de dados;
-* Informa ao turno que a reserva foi cancelada.
+* Informa à *mesa* que ela foi limpa.
 
 ## Database
 
-A base de dados guarda todas as informações históricas do restaurante, além da despensa atual e outras informações estáveis do restaurante, como lista de funcionários, cardápio e configuração das mesas.
+A base de dados guarda todas as informações históricas do restaurante, além da despensa atual e outras informações estáveis do restaurante, como lista de funcionários, cardápio e mesas.
 
-### getTurnoAtual
+### hasTurnoAtivo
+
+Retorna um booleano indicando se existe um turno ativo no restaurante no momento.
+
+### getTurnoAtivo
 
 Retorna, em condições normais, o turno atual do restaurante. Se não houver um turno ativo, ou seja, o restaurante está fechado, joga uma exceção, *SemTurnoAtivoException*.
 
-Esse comportamento serve para impedir a maior parte das ações, excetuando algumas do gerente, de acontecerem quando não há um turno ativo. 
+Esse comportamento serve para impedir ações que precisam de turno de acontecerem quando não há um turno ativo. 
 
 ### getFuncionario(ID: String)
 
@@ -150,66 +188,50 @@ Passa por todos os funcionários cadastrados, retornando aquele que possui o ID 
 
 Retorna todas as mesas existentes no restaurante.
 
+### atualizaDespensa(itensARemover: List<Ingrediente>)
+
+Remove da despensa todos os ingredientes de *itensARemover*. Não é possível que os itens em *itensARemover* não estejam na despensa, pois essa verificação é feita antes de permitir a inclusão destes itens em algum pedido.
+
 ## Turno
 
-Guarda todas as informações relacionadas a um turno específico, como a situação de cada mesa, o dinheiro obtido por cada funcionário, a distribuição de garçom por mesa, etc. 
+Guarda todas as informações relacionadas a um turno específico, como os pedidos de cada mesa, o dinheiro obtido por cada funcionário, a distribuição de garçom por mesa, etc. 
 
-Como cada instância de *Mesa* guarda apenas as informações permanentes dela (a capacidade), o estado atual dela precisa ser armazenado de alguma forma em cada *Turno*. Para isso, a solução pensada foi representar o estado dela pela presença ou não da mesa em uma lista.
-
-Existem 3 estados principais em que uma mesa pode estar. com um deles sendo quebrado em dois sub-estados. São eles:
-
-* Livre
-* Suja 
-* Ocupada
-	* Pedido a fazer
-	* Pedido feito
-
-Para isso, são feitas duas listas e um mapa em cada *Turno*, e cada *Mesa* deve estar em exatamente uma dessas 3 coleções. As duas listas ,*mesasLivres* e *mesasALimpar*, representam as mesas livres e sujas, respectivamente. 
-
-Para representar as mesas ocupadas, é usado um mapa, com a mesa sendo a chave e o pedido da mesa sendo o valor. Para as mesas que ainda não fizeram o pedido, o valor ligado a ela será nulo, e assim sua identificação será fácil de ser feita. 
+Para representar as mesas ocupadas e seus pedidos, é usado um mapa, com a mesa sendo a chave e o pedido da mesa sendo o valor. Para as mesas que ainda não fizeram o pedido, o valor ligado a ela será nulo, e assim sua identificação será fácil de ser feita.
 
 ### sentaCliente(mesa:Mesa)
 
-1. Se a mesa não está na lista de mesas disponíveis, joga uma *AçãoInválidaException*, com a mensagem de que a mesa não está disponível.
-2. Remove a mesa da lista de disponíveis, e a adiciona ao mapa de mesas ocupadas, com um pedido nulo (null).
+1. Adiciona a mesa ao mapa de mesas ocupadas, com um pedido nulo (null);
+2. Informa aos garçons do setor da mesa que ela requer atenção.
 
-### getReservas
+###getPedidos
 
-Retorna todas as reservas do turno.
+Retorna a coleção de valores do mapa de mesas ocupadas, removendo valores nulos.
 
-### reservaMesa(mesa: Mesa, horario: Time)
+###addCusto(custo: double)
 
-Cria uma nova instância de *Reserva* com a mesa e horário especificados e adiciona à lista de reservas.  
-
-### cancelaReserva(reserva: Reserva)
-
-Remove reserva da lista de reservas.
-
-### getMesasSujas
-
-Retorna a lista de todas as mesas sujas do restaurante.
-
-###liberaMesa(mesa: Mesa)
-
-Remove da lista de mesas sujas e acrescenta nas mesas disponíveis para uso.
-
-###getPedidosPendentes
-
-Retorna a lista de pedidos pendentes do turno
-
-###movePedidoParaPreparacao(pedido: Pedido)
-
-Move o pedido da lista de pedidos pendentes para a lista de pedidos em preparação do turno.
-
-
-###atualizarItens(itens: List<Item>)
-
-Faz a atualização da dispensa do turno removendo os ingredientes utilizados para a preparação dos itens informados na lista dada como parâmetro.
+Adiciona o valor ao custo corrente do turno
 
 ## Pedido
 
-Guarda as informações sobre o pedido de uma mesa. Uma mesa não pode conter mais de um pedido. Ele contém uma lista de itens pendentes, que ainda não iniciaram sua preparação, uma lista de itens em preparação e uma lista de itens prontos, itens que já podem ser servidos. 
+Guarda as informações sobre o pedido de uma mesa. Uma mesa não pode conter mais de um pedido. Ele contém um mapa relacionando seus itens com o estado de preparação de cada um. Além disso, ele possui um atributo geral indicando seu estado de preparação.
 
-###moveItensParaPreparacao(item: List<Item>)
+## Item
 
-Move lista de itens recebida para lista de itens em preparação.
+Guarda todas as informações relativas a um item do cardápio. Elas são: categoria, preço, custo e tempo de preparação e a receita do item.
+
+## Receita
+
+## Ingrediente
+
+## Mesa
+
+Guarda todas as informações relacionadas a uma mesa do restaurante. Além das informações permanentes, como capacidade e setor, também armazena informações de estado da mesa, como se está ocupada, limpa ou se possui uma reserva feita.
+
+### desocupa
+
+Passa o valor de ocupada para falso, e o valor de limpa para falso.
+
+### isDisponível
+
+1. Caso possua uma reserva feita para um horário que viola o intervalo de tolerância definido, a reserva é cancelada.
+2. Retorna verdadeiro se ela está desocupada, limpa e não possui uma reserva feita. 
