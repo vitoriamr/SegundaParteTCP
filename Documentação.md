@@ -4,7 +4,6 @@
 
 <!-- Ignorem o HTML embaixo. Ele serve para fazer a tabela de conteúdos -->
 
-<p><div class="toc">
 <ul>
 <li><a href="#uiaction">UIAction</a><ul>
 <li><a href="#loginaction">LoginAction</a></li>
@@ -17,6 +16,7 @@
 <li><a href="#iniciarpreparacaoaction">IniciarPreparacaoAction</a></li>
 </ul>
 </li>
+<li><a href="#atendemesasequence">AtendeMesaSequence</a></li>
 <li><a href="#restaurantoperationservice">RestaurantOperationService</a><ul>
 <li><a href="#getmesasparapessoas-int">getMesasPara(pessoas: int)</a></li>
 <li><a href="#sentaclientemesa-mesa">sentaCliente(mesa: Mesa)</a></li>
@@ -25,6 +25,9 @@
 <li><a href="#cancelareservamesa-mesa">cancelaReserva(mesa: Mesa)</a></li>
 <li><a href="#getmesassujas">getMesasSujas</a></li>
 <li><a href="#liberamesamesa-mesa">liberaMesa(mesa: Mesa)</a></li>
+<li><a href="#getmesasparaatendimentofuncionario-garçom">getMesasParaAtendimento(funcionario: Garçom)</a></li>
+<li><a href="#getcardapio">getCardapio</a></li>
+<li><a href="#criapedidomesa-mesa-pedido-pedido">criaPedido(mesa: Mesa, pedido: Pedido)</a></li>
 </ul>
 </li>
 <li><a href="#database">Database</a><ul>
@@ -41,7 +44,12 @@
 <li><a href="#addcustocusto-double">addCusto(custo: double)</a></li>
 </ul>
 </li>
-<li><a href="#pedido">Pedido</a></li>
+<li><a href="#pedido">Pedido</a><ul>
+<li><a href="#additemspedido-pedido">addItems(pedido: Pedido)</a></li>
+<li><a href="#additemitem-item">addItem(item: Item)</a></li>
+</ul>
+</li>
+<li><a href="#itempedido">ItemPedido</a></li>
 <li><a href="#item">Item</a></li>
 <li><a href="#receita">Receita</a></li>
 <li><a href="#ingrediente">Ingrediente</a></li>
@@ -53,8 +61,6 @@
 </ul>
 </li>
 </ul>
-</div>
-</p>
 
 
 ##UIAction
@@ -128,6 +134,16 @@ O fluxo de dados é informado abaixo:
 
 *Sugestão de implementação:* para a escolha dos itens, primeiro mostre todos os pedidos pendentes para o usuário. Depois, quando ele escolher qual pedido vai preparar, mostre quais os itens desse pedido que estão pendentes. Assim, fica fácil criar os parâmetros necessários para a chamada de método de *RestaurantOperationService*. 
 
+## AtendeMesaSequence
+
+É usada por um garçom para registrar os pedidos de uma mesa. Ao chamar a ação, ele vê uma lista de todas as mesas que podem ser atendidas por ele, sejam elas as que não têm nenhum pedido e estão em seu setor, seja as que já têm um pedido feito por ele. Com essas mesas visíveis, ele escolhe a mesa que deseja atender e recebe um cardápio para marcar quais itens adicionar ao pedido da mesa. Quando ele confirma os itens adicionados, o pedido da mesa é atualizado.
+
+1. Pede ao *RestaurantOperationService* a lista de mesas disponíveis para atendimento para o garçom, definido pelo usuário de *RestaurantInterface*.
+2. Ele escolhe a mesa dentre as da lista.
+3. Pede ao *RestaurantOperationService* o cardápio do restaurante.
+4. Escolhe os itens dentre os da lista.
+5. Cria um novo pedido com os itens especificados, chamando o método *criaPedido* de *RestaurantOperationService* para informar o novo pedido da mesa. (Caso a mesa já possua um pedido, isso será lidado por *criaPedido*)
+
 ## RestaurantOperationService
 
 Gerencia a comunicação entre as ações, que lidam com a obtenção e display de informações ao usuário, e os dados propriamente ditos.
@@ -165,6 +181,28 @@ Gerencia a comunicação entre as ações, que lidam com a obtenção e display 
 ### liberaMesa(mesa: Mesa)
 
 * Informa à *mesa* que ela foi limpa.
+
+### getMesasParaAtendimento(funcionario: Garçom)
+
+1. Pede ao banco de dados o turno ativo.
+2. Do turno, pede qual o setor alocado a *funcionario*
+3. Do banco de dados, pega a lista de todas as mesas daquele setor.
+4. Filtra as mesas para as que satisfazem as seguintes restrições:
+	* estão ocupadas
+	* não possuem pedido ou possuem um pedido cujo garçom é *funcionario*
+5. Retorna essa lista filtrada
+
+### getCardapio
+
+Pede ao banco de dados o cardápio do restaurante
+
+### criaPedido(mesa: Mesa, pedido: Pedido)
+
+1. Pega o turno ativo do banco de dados;
+2. Para cada item que for do tipo bebida de *pedido*, adiciona o custo ao turno atual;
+3. Verifica se a mesa possui um pedido já feito.
+	1. Se a mesa não possui pedido, *pedido* é dado como seu pedido, e o pedido é inserido na lista de pedidos do turno atual.
+	2. Se a mesa possui pedido, chamamos *addItems* para o pedido da mesa, que cuida da adição dos itens novos. Também mudamos o estado do pedido da mesa para pendente, já que existem novos itens que precisam ser preparados.
 
 ## Database
 
@@ -213,7 +251,19 @@ Adiciona o valor ao custo corrente do turno
 
 ## Pedido
 
-Guarda as informações sobre o pedido de uma mesa. Uma mesa não pode conter mais de um pedido. Ele contém um mapa relacionando seus itens com o estado de preparação de cada um. Além disso, ele possui um atributo geral indicando seu estado de preparação.
+Guarda as informações sobre o pedido de uma mesa. Uma mesa não pode conter mais de um pedido. Ele contém um mapa relacionando seus itens com o estado de preparação de cada um. Além disso, ele possui um atributo indicando seu estado de preparação e o garçom responsável pelo pedido.
+
+### addItems(pedido: Pedido)
+
+Recebe um pedido e adiciona os itens desse pedido à lista de itens. Cada item de *pedido* deve ser adicionado através do método *adicionaItem*, que lida com a ordenação adequada dos items.
+
+### addItem(item: Item)
+
+Cria um novo *ItemPedido*, com o item especificado e estado PENDENTE. Depois, analisa o *item* o coloca na ordem adequada na lista, seguindo as especificações do trabalho.
+
+## ItemPedido
+
+Uma classe para facilitar o rastreamento da preparação de itens em pedidos. Guarda um item e seu estado de preparação, com getters e setters pra cada um dos atributos.
 
 ## Item
 
