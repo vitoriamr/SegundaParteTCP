@@ -134,6 +134,16 @@ Inicialmente o atendente pede a lista de mesas sujas e verifica as que ele já l
 
 Após esta verificação, a mesa é marcada como limpa.
 
+### IniciaTurnoAction
+
+Ação efetuada pelo gerente quando deseja iniciar um turno. Ao chamar a ação, ele verifica que todas as mesas estão liberadas (prontas para a recepção de um cliente, ou seja, limpas e vazias), caso contrário não é possível continuar a ação, e então seleciona os garçons para determinados setores.
+
+O fluxo de dados é informado abaixo:
+
+1. A verificação das mesas das mesas liberadas é confirmada ou não.
+2. Se a verificação das mesas é confirmada, é pega a lista de garçons e a lista de setores.
+3. São definidos pelo gerente, através de um mapa, os garçons de cada setor.
+
 ### IniciarPreparacaoAction
 
 Essa ação é usada pelo cozinheiro quando ele quer começar a preparação de novos itens/pedidos. Ele vê no sistema quais são os itens que ainda não foram atendidos, e então decide qual começar. Ele então informa ao sistema qual o pedido iniciado, além de quais itens ele iniciou (não é necessário iniciar a preparação de todos os itens de um pedido de uma vez).
@@ -153,7 +163,9 @@ O fluxo de dados é informado abaixo:
 2. Ele escolhe a mesa dentre as da lista.
 3. Pede ao *RestaurantOperationService* o cardápio do restaurante.
 4. Escolhe os itens dentre os da lista.
-5. Cria um novo pedido com os itens especificados, chamando o método *criaPedido* de *RestaurantOperationService* para informar o novo pedido da mesa. (Caso a mesa já possua um pedido, isso será lidado por *criaPedido*)
+5. Cria um novo pedido com os itens especificados, chamando o método *criaPedido* de *
+6. 
+7. Service* para informar o novo pedido da mesa. (Caso a mesa já possua um pedido, isso será lidado por *criaPedido*)
 
 ## FechaMesaSequence
 
@@ -168,6 +180,22 @@ O fluxo de dados é informado abaixo:
 ## RestaurantOperationService
 
 Gerencia a comunicação entre as ações, que lidam com a obtenção e display de informações ao usuário, e os dados propriamente ditos.
+
+### verificaMesasLiberadas: 
+
+Solicita à base de dados um booleano para a pergunta: Todas as mesas estão liberadas, ou seja, limpas e vazias para acomodar um cliente? 
+
+### getGarcons:
+
+Solicita ao Turno a relação dos garçons daquele turno. Retorna uma lista de garçons.
+
+### getSetores:
+
+Solicita à base de dados a relação dos setores. Retorna uma lista de setores.
+
+### setGarconsSetor(MapSetorGarcons : Map<List<Garcom>,Setor>):
+
+Define os garçons para cada setor a partir de um dado mapa de garçons e setor.
 
 ### getMesasPara(pessoas: int)
 
@@ -250,6 +278,10 @@ Pede ao banco de dados o cardápio do restaurante
 
 A base de dados guarda todas as informações históricas do restaurante, além da despensa atual e outras informações estáveis do restaurante, como lista de funcionários, cardápio e mesas.
 
+### getSetores
+
+Retorna uma lista com os setores.
+
 ### hasTurnoAtivo
 
 Retorna um booleano indicando se existe um turno ativo no restaurante no momento.
@@ -285,6 +317,14 @@ Retorna o cardápio do restaurante
 Guarda todas as informações relacionadas a um turno específico, como os pedidos de cada mesa, o dinheiro obtido por cada funcionário, a distribuição de garçom por mesa, etc. 
 
 Mantém uma lista de todos os pedidos feitos no turno, sem deletar pedidos que foram completos.
+
+### getGarcons
+
+Retorna uma lista com os garçons daquele turno.
+
+### setGarconsSetor
+
+Solicita ao turno que defina os garçons para cada setor a partir de um dado mapa de garçons e setor.
 
 ### addPedido(pedido: Pedido)
 
