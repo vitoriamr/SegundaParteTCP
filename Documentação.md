@@ -17,6 +17,7 @@
 </ul>
 </li>
 <li><a href="#atendemesasequence">AtendeMesaSequence</a></li>
+<li><a href="#fechamesasequence">FechaMesaSequence</a></li>
 <li><a href="#restaurantoperationservice">RestaurantOperationService</a><ul>
 <li><a href="#getmesasparapessoas-int">getMesasPara(pessoas: int)</a></li>
 <li><a href="#sentaclientemesa-mesa">sentaCliente(mesa: Mesa)</a></li>
@@ -28,25 +29,35 @@
 <li><a href="#getmesasparaatendimentofuncionario-garçom">getMesasParaAtendimento(funcionario: Garçom)</a></li>
 <li><a href="#getcardapio">getCardapio</a></li>
 <li><a href="#criapedidomesa-mesa-pedido-pedido">criaPedido(mesa: Mesa, pedido: Pedido)</a></li>
+<li><a href="#getmesasabertasgarçom-garçom">getMesasAbertas(garçom: Garçom)</a></li>
+<li><a href="#getpreçopedidomesa-mesa">getPreçoPedido(mesa: Mesa)</a></li>
+<li><a href="#fechamesamesa-mesa-aceita-boolean">fechaMesa(mesa: Mesa, aceita: boolean)</a></li>
 </ul>
 </li>
 <li><a href="#database">Database</a><ul>
 <li><a href="#hasturnoativo">hasTurnoAtivo</a></li>
 <li><a href="#getturnoativo">getTurnoAtivo</a></li>
 <li><a href="#getfuncionarioid-string">getFuncionario(ID: String)</a></li>
+<li><a href="#getmesassetor-setor">getMesas(setor: Setor)</a></li>
 <li><a href="#getmesas">getMesas</a></li>
-<li><a href="#atualizadespensaitensaremover-list">atualizaDespensa(itensARemover: List)</a></li>
+<li><a href="#atualizadespensaitensaremover-list-ingrediente">atualizaDespensa(itensARemover: List Ingrediente)</a></li>
+<li><a href="#getcardapio-1">getCardapio</a></li>
 </ul>
 </li>
 <li><a href="#turno">Turno</a><ul>
-<li><a href="#sentaclientemesamesa">sentaCliente(mesa:Mesa)</a></li>
+<li><a href="#addpedidopedido-pedido">addPedido(pedido: Pedido)</a></li>
 <li><a href="#getpedidos">getPedidos</a></li>
 <li><a href="#addcustocusto-double">addCusto(custo: double)</a></li>
+<li><a href="#addlucrolucro-double">addLucro(lucro: double)</a></li>
+<li><a href="#getsetorgarçom-garçom">getSetor(garçom: Garçom)</a></li>
+<li><a href="#addgorjetafuncionario-funcionario-valor-double">addGorjeta(funcionario: Funcionario, valor: double)</a></li>
 </ul>
 </li>
 <li><a href="#pedido">Pedido</a><ul>
+<li><a href="#setestadoitensitens-list-item-estado-estado">setEstadoItens(itens: List Item, estado: Estado)</a></li>
 <li><a href="#additemspedido-pedido">addItems(pedido: Pedido)</a></li>
 <li><a href="#additemitem-item">addItem(item: Item)</a></li>
+<li><a href="#getpreço">getPreço</a></li>
 </ul>
 </li>
 <li><a href="#itempedido">ItemPedido</a></li>
@@ -144,6 +155,16 @@ O fluxo de dados é informado abaixo:
 4. Escolhe os itens dentre os da lista.
 5. Cria um novo pedido com os itens especificados, chamando o método *criaPedido* de *RestaurantOperationService* para informar o novo pedido da mesa. (Caso a mesa já possua um pedido, isso será lidado por *criaPedido*)
 
+## FechaMesaSequence
+
+É usada pelo garçom responsável por uma mesa para indicar que o cliente fechou a conta. O garçom é mostrado uma lista de mesas que ele está atendendo, e ele escolhe qual mesa fechou a conta. Com isso feito, é mostrado a ele o preço total do pedido, com opção de aceitar ou rejeitar o pagamento. Ele indica se o pagamento foi feito ou não, e então a ação faz as mudanças necessárias no programa.
+
+1. Pede ao *RestaurantOperationService* a lista de mesas abertas para o garçom.
+2. Ele escolhe a mesa dentre as da lista.
+3. O *RestaurantOperationService* informa qual o preço final da conta.
+4. Ele informa se o cliente pagou ou não a conta.
+5. Chama o método *fechaMesa* com a mesa e se a conta foi paga ou não. Com isso, a mesa é marcada como desocupada e o pedido é removido da mesa.
+
 ## RestaurantOperationService
 
 Gerencia a comunicação entre as ações, que lidam com a obtenção e display de informações ao usuário, e os dados propriamente ditos.
@@ -204,6 +225,27 @@ Pede ao banco de dados o cardápio do restaurante
 	1. Se a mesa não possui pedido, *pedido* é dado como seu pedido, e o pedido é inserido na lista de pedidos do turno atual.
 	2. Se a mesa possui pedido, chamamos *addItems* para o pedido da mesa, que cuida da adição dos itens novos. Também mudamos o estado do pedido da mesa para pendente, já que existem novos itens que precisam ser preparados.
 
+###getMesasAbertas(garçom: Garçom)
+
+1. Pega o turno ativo do banco de dados;
+2. Pega o setor que foi alocado para *garçom* nesse turno;
+3. Pega a lista de todas as mesas desse setor do banco de dados;
+4. Filtra essa lista de mesas para aquelas que estão ocupadas e com um pedido feito por *garçom*.
+5. Retorna essa lista de mesas
+
+### getPreçoPedido(mesa: Mesa)
+
+1. Pega o pedido da mesa
+2. Retorna o preço do pedido
+
+### fechaMesa(mesa: Mesa, aceita: boolean)
+
+1. Pega o preço total do pedido da mesa.
+2. Verifica o valor de aceita:
+	1. Se verdadeiro, soma o preço no lucro do turno atual, além de colocar 7% de preço como a gorjeta do garçom responsável pelo pedido da mesa. Também marca que o valor de gorjeta de limpeza da mesa é 3% do preço.
+	2. Se for falso, soma o preço aos custos do turno.
+3. Marca a mesa como desocupada, removendo o seu pedido e marcando-a como precisando de limpeza.
+
 ## Database
 
 A base de dados guarda todas as informações históricas do restaurante, além da despensa atual e outras informações estáveis do restaurante, como lista de funcionários, cardápio e mesas.
@@ -222,36 +264,59 @@ Esse comportamento serve para impedir ações que precisam de turno de acontecer
 
 Passa por todos os funcionários cadastrados, retornando aquele que possui o ID informado. Se não existe nenhum funcionário com esse ID, retorna null.
 
+### getMesas(setor: Setor)
+
+Retorna todas as mesas existentes no setor especificado.
+
 ### getMesas
 
 Retorna todas as mesas existentes no restaurante.
 
-### atualizaDespensa(itensARemover: List<Ingrediente>)
+### atualizaDespensa(itensARemover: List Ingrediente)
 
 Remove da despensa todos os ingredientes de *itensARemover*. Não é possível que os itens em *itensARemover* não estejam na despensa, pois essa verificação é feita antes de permitir a inclusão destes itens em algum pedido.
+
+### getCardapio
+
+Retorna o cardápio do restaurante
 
 ## Turno
 
 Guarda todas as informações relacionadas a um turno específico, como os pedidos de cada mesa, o dinheiro obtido por cada funcionário, a distribuição de garçom por mesa, etc. 
 
-Para representar as mesas ocupadas e seus pedidos, é usado um mapa, com a mesa sendo a chave e o pedido da mesa sendo o valor. Para as mesas que ainda não fizeram o pedido, o valor ligado a ela será nulo, e assim sua identificação será fácil de ser feita.
+Mantém uma lista de todos os pedidos feitos no turno, sem deletar pedidos que foram completos.
 
-### sentaCliente(mesa:Mesa)
+### addPedido(pedido: Pedido)
 
-1. Adiciona a mesa ao mapa de mesas ocupadas, com um pedido nulo (null);
-2. Informa aos garçons do setor da mesa que ela requer atenção.
+Adiciona o pedido para a lista de pedidos do turno. É usado quando uma mesa faz um pedido novo.
 
 ###getPedidos
 
-Retorna a coleção de valores do mapa de mesas ocupadas, removendo valores nulos.
+Retorna a lista de pedidos do turno. Para obter uma lista de pedidos pendentes, é necessário filtrar a resposta desse método, já que todos os pedidos históricos também estão presentes.
 
 ###addCusto(custo: double)
 
-Adiciona o valor ao custo corrente do turno
+Adiciona o valor ao custo corrente do turno.
+
+###addLucro(lucro: double)
+
+Adiciona o valor ao lucro atual do turno.
+
+### getSetor(garçom: Garçom)
+
+Retorna o setor alocado para o garçom especificado
+
+### addGorjeta(funcionario: Funcionario, valor: double)
+
+Adiciona o valor especificado para a entrada do funcionário no mapa de gorjetas. Na versão atual do programa, apenas garçons e auxiliares de cozinha podem receber gorjetas, mas o método é genérico para permitir mudanças futuras.
 
 ## Pedido
 
 Guarda as informações sobre o pedido de uma mesa. Uma mesa não pode conter mais de um pedido. Ele contém um mapa relacionando seus itens com o estado de preparação de cada um. Além disso, ele possui um atributo indicando seu estado de preparação e o garçom responsável pelo pedido.
+
+###setEstadoItens(itens: List Item, estado: Estado)
+
+Modifica todos os estados de *itens* para *estado*. É possível que exista mais de um ItemPedido com algum dos itens da lista, mas qualquer um que seja modificado é válido, já que são todos iguais. Assim, pedidos com itens repetidos não são afetados por isso.
 
 ### addItems(pedido: Pedido)
 
@@ -260,6 +325,10 @@ Recebe um pedido e adiciona os itens desse pedido à lista de itens. Cada item d
 ### addItem(item: Item)
 
 Cria um novo *ItemPedido*, com o item especificado e estado PENDENTE. Depois, analisa o *item* o coloca na ordem adequada na lista, seguindo as especificações do trabalho.
+
+### getPreço
+
+Retorna a soma do preço de todos os itens do pedido.
 
 ## ItemPedido
 
@@ -279,7 +348,7 @@ Guarda todas as informações relacionadas a uma mesa do restaurante. Além das 
 
 ### desocupa
 
-Passa o valor de ocupada para falso, e o valor de limpa para falso.
+Passa o valor de ocupada para falso, e o valor de limpa para falso. Além disso, remove o pedido da mesa.
 
 ### isDisponível
 
