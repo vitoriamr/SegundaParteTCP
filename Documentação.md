@@ -97,6 +97,13 @@ Nenhuma mudança nos dados deve ser feita em *UIAction* ou qualquer de suas subc
 
 Provavelmente a ação mais simples, ela informa ao *RestaurantOperationService*, que por sua vez informa a *RestaurantInterface*, que o usuário deseja fazer logout, e o estado da interface é resetado a como é quando o programa começa.
 
+###FazerRelatorioAction
+
+Utilizada apenas pelo gerente, esta ação irá fazer o relatório dos lucros e das despesas de um determinado turno.
+Inicialmente, o gerente pega o lucro inteiro, ou seja, aquele que o restaurante adquiriu no total e não em um determinado turno.
+Em seguida, ele escolhe o turno desejado e, a partir dele, seleciona os lucros daquele turno em si.
+O mesmo ocorre para as despesas: O gerente pega as despesas totais e, depois de escolher o turno, pega só aquelas que dizem respeito ao mesmo.
+
 ### SentaClienteAction
 
 Essa *UIAction* se refere à ação de sentar um cliente novo em uma mesa disponível, e deve ser feita pelo atendente. 
@@ -155,7 +162,7 @@ O fluxo de dados é informado abaixo:
 
 *Sugestão de implementação:* para a escolha dos itens, primeiro mostre todos os pedidos pendentes para o usuário. Depois, quando ele escolher qual pedido vai preparar, mostre quais os itens desse pedido que estão pendentes. Assim, fica fácil criar os parâmetros necessários para a chamada de método de *RestaurantOperationService*. 
 
-## AtendeMesaSequence
+## AtendeMesaAction
 
 É usada por um garçom para registrar os pedidos de uma mesa. Ao chamar a ação, ele vê uma lista de todas as mesas que podem ser atendidas por ele, sejam elas as que não têm nenhum pedido e estão em seu setor, seja as que já têm um pedido feito por ele. Com essas mesas visíveis, ele escolhe a mesa que deseja atender e recebe um cardápio para marcar quais itens adicionar ao pedido da mesa. Quando ele confirma os itens adicionados, o pedido da mesa é atualizado.
 
@@ -167,7 +174,7 @@ O fluxo de dados é informado abaixo:
 6. 
 7. Service* para informar o novo pedido da mesa. (Caso a mesa já possua um pedido, isso será lidado por *criaPedido*)
 
-## FechaMesaSequence
+## FechaMesaAction
 
 É usada pelo garçom responsável por uma mesa para indicar que o cliente fechou a conta. O garçom é mostrado uma lista de mesas que ele está atendendo, e ele escolhe qual mesa fechou a conta. Com isso feito, é mostrado a ele o preço total do pedido, com opção de aceitar ou rejeitar o pagamento. Ele indica se o pagamento foi feito ou não, e então a ação faz as mudanças necessárias no programa.
 
@@ -192,6 +199,14 @@ Solicita ao Turno a relação dos garçons daquele turno. Retorna uma lista de g
 ### getSetores:
 
 Solicita à base de dados a relação dos setores. Retorna uma lista de setores.
+
+### getLucros:
+
+Recebe o valor total de lucro obtido em todos os turnos do restaurante.
+
+### getDespesas:
+
+Recebe o valor total de custo/despesa obtido em todos os turnos do restaurante.
 
 ### setGarconsSetor(MapSetorGarcons : Map<List<Garcom>,Setor>):
 
@@ -292,6 +307,10 @@ Retorna, em condições normais, o turno atual do restaurante. Se não houver um
 
 Esse comportamento serve para impedir ações que precisam de turno de acontecerem quando não há um turno ativo. 
 
+### getTodosTurnos
+
+Retorna uma lista de todos os turnos do restaurante para que o gerente selecione aquele que quer no momento.
+
 ### getFuncionario(ID: String)
 
 Passa por todos os funcionários cadastrados, retornando aquele que possui o ID informado. Se não existe nenhum funcionário com esse ID, retorna null.
@@ -338,9 +357,17 @@ Retorna a lista de pedidos do turno. Para obter uma lista de pedidos pendentes, 
 
 Adiciona o valor ao custo corrente do turno.
 
+###getSomaCustos
+
+Retorna o valor total do(a) lucro/despesa de um determinado turno já escolhido.
+
 ###addLucro(lucro: double)
 
 Adiciona o valor ao lucro atual do turno.
+
+###getSomaLucros
+
+Retorna o valor total do lucro de um determinado turno já escolhido.
 
 ### getSetor(garçom: Garçom)
 
