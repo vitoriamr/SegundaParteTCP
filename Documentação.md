@@ -1,5 +1,6 @@
 
 
+
 **Table of Contents**
 
 <!-- Ignorem o HTML embaixo. Ele serve para fazer a tabela de conteúdos -->
@@ -100,9 +101,8 @@ Provavelmente a ação mais simples, ela informa ao *RestaurantOperationService*
 ###FazerRelatorioAction
 
 Utilizada apenas pelo gerente, esta ação irá fazer o relatório dos lucros e das despesas de um determinado turno.
-Inicialmente, o gerente pega o lucro inteiro, ou seja, aquele que o restaurante adquiriu no total e não em um determinado turno.
-Em seguida, ele escolhe o turno desejado e, a partir dele, seleciona os lucros daquele turno em si.
-O mesmo ocorre para as despesas: O gerente pega as despesas totais e, depois de escolher o turno, pega só aquelas que dizem respeito ao mesmo.
+Inicialmente, o gerente escolhe o turno que deseja.
+Em seguida, ele pega o total de despesas e lucro do turno escolhido e cria um relatório com os valores obtidos.
 
 ### SentaClienteAction
 
@@ -199,14 +199,6 @@ Solicita ao Turno a relação dos garçons daquele turno. Retorna uma lista de g
 ### getSetores:
 
 Solicita à base de dados a relação dos setores. Retorna uma lista de setores.
-
-### getLucros:
-
-Recebe o valor total de lucro obtido em todos os turnos do restaurante.
-
-### getDespesas:
-
-Recebe o valor total de custo/despesa obtido em todos os turnos do restaurante.
 
 ### setGarconsSetor(MapSetorGarcons : Map<List<Garcom>,Setor>):
 
@@ -307,7 +299,7 @@ Retorna, em condições normais, o turno atual do restaurante. Se não houver um
 
 Esse comportamento serve para impedir ações que precisam de turno de acontecerem quando não há um turno ativo. 
 
-### getTodosTurnos
+### getTurno
 
 Retorna uma lista de todos os turnos do restaurante para que o gerente selecione aquele que quer no momento.
 
@@ -421,3 +413,5 @@ Passa o valor de ocupada para falso, e o valor de limpa para falso. Além disso,
 
 1. Caso possua uma reserva feita para um horário que viola o intervalo de tolerância definido, a reserva é cancelada.
 2. Retorna verdadeiro se ela está desocupada, limpa e não possui uma reserva feita. 
+
+> Written with [StackEdit](https://stackedit.io/).
