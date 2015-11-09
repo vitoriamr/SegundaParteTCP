@@ -97,7 +97,17 @@ Nenhuma mudança nos dados deve ser feita em *UIAction* ou qualquer de suas subc
 
 Provavelmente a ação mais simples, ela informa ao *RestaurantOperationService*, que por sua vez informa a *RestaurantInterface*, que o usuário deseja fazer logout, e o estado da interface é resetado a como é quando o programa começa.
 
-###FazerRelatorioAction
+### FinalizaTurnoAction
+
+Utilizada pelo gerente, esta ação verifica se todas as mesas estão fechadas, ou seja, com as contas fechadas. Se sim, faz com que o turno ativo vá para a lista de turnos e o mesmo seja retirado do turno ativo.
+
+O fluxo de dados é:
+
+1. A verificação das mesas das mesas fechadas é confirmada ou não.
+2. Se a verificação das mesas é confirmada, é solicitada à base de dados que o atual turno vá para a lista de turnos e o turno ativo receba NULL.
+
+
+### FazerRelatorioAction
 
 Utilizada apenas pelo gerente, esta ação irá fazer o relatório dos lucros e das despesas de um determinado turno.
 Inicialmente, o gerente pega o lucro inteiro, ou seja, aquele que o restaurante adquiriu no total e não em um determinado turno.
@@ -187,6 +197,14 @@ O fluxo de dados é informado abaixo:
 ## RestaurantOperationService
 
 Gerencia a comunicação entre as ações, que lidam com a obtenção e display de informações ao usuário, e os dados propriamente ditos.
+
+### verificaMesasFechada
+
+Retorna um booleano correspondente à pergunta: Todas as mesas estão fechadas, ou seja, não há nenhuma mesa com a conta aberta?
+
+### retirarTurnoAtivo
+
+Solicita à base de dados que retire o turno atual do turno ativo e o adicione à lista de turnos.
 
 ### verificaMesasLiberadas: 
 
@@ -292,6 +310,10 @@ Pede ao banco de dados o cardápio do restaurante
 ## Database
 
 A base de dados guarda todas as informações históricas do restaurante, além da despensa atual e outras informações estáveis do restaurante, como lista de funcionários, cardápio e mesas.
+
+### armazenaTurnoAtivo( turno: Turno)
+
+Retira o turno atual do turno ativo e o adiciona à lista de turnos.
 
 ### getSetores
 
