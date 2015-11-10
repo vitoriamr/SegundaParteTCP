@@ -220,6 +220,10 @@ Solicita à base de dados um booleano para a pergunta: Todas as mesas estão lib
 
 Solicita ao Turno a relação dos garçons daquele turno. Retorna uma lista de garçons.
 
+### getTurno
+
+Função utilizada para devolver todos os turnos do restaurante para que o gerente escolha em qual necessita operar.
+
 ### getSetores:
 
 Solicita à base de dados a relação dos setores. Retorna uma lista de setores.
@@ -445,5 +449,8 @@ Passa o valor de ocupada para falso, e o valor de limpa para falso. Além disso,
 
 1. Caso possua uma reserva feita para um horário que viola o intervalo de tolerância definido, a reserva é cancelada.
 2. Retorna verdadeiro se ela está desocupada, limpa e não possui uma reserva feita. 
+
+> Written with [StackEdit](https://stackedit.io/).
+
 
 > Written with [StackEdit](https://stackedit.io/).
