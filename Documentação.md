@@ -165,7 +165,7 @@ O fluxo de dados é informado abaixo:
 
 Usada pelo gerente, esta ação tem como objetivo gerar a folha de pagamento de todos os funcionários do restaurante.
 Em primeiro lugar, o gerente escolhe o turno cuja folha de pagamento será feita.
-A partir desse turno e a partir do nome de algum funcionário que nele trabalhe, o gerente receberá um mapa contendo o nome de tal funcionário, juntamente com seu respectivo salário (salário + gorjetas ganhas ao longo do turno).
+A partir desse turno, o gerente receberá um mapa contendo um funcionário, juntamente com seu respectivo salário (salário + gorjetas ganhas ao longo do turno).
 
 ### IniciarPreparacaoAction
 
@@ -178,7 +178,7 @@ O fluxo de dados é informado abaixo:
 
 *Sugestão de implementação:* para a escolha dos itens, primeiro mostre todos os pedidos pendentes para o usuário. Depois, quando ele escolher qual pedido vai preparar, mostre quais os itens desse pedido que estão pendentes. Assim, fica fácil criar os parâmetros necessários para a chamada de método de *RestaurantOperationService*. 
 
-## AtendeMesaAction
+### AtendeMesaAction
 
 É usada por um garçom para registrar os pedidos de uma mesa. Ao chamar a ação, ele vê uma lista de todas as mesas que podem ser atendidas por ele, sejam elas as que não têm nenhum pedido e estão em seu setor, seja as que já têm um pedido feito por ele. Com essas mesas visíveis, ele escolhe a mesa que deseja atender e recebe um cardápio para marcar quais itens adicionar ao pedido da mesa. Quando ele confirma os itens adicionados, o pedido da mesa é atualizado.
 
@@ -190,7 +190,7 @@ O fluxo de dados é informado abaixo:
 6. 
 7. Service* para informar o novo pedido da mesa. (Caso a mesa já possua um pedido, isso será lidado por *criaPedido*)
 
-## FechaMesaAction
+### FechaMesaAction
 
 É usada pelo garçom responsável por uma mesa para indicar que o cliente fechou a conta. O garçom é mostrado uma lista de mesas que ele está atendendo, e ele escolhe qual mesa fechou a conta. Com isso feito, é mostrado a ele o preço total do pedido, com opção de aceitar ou rejeitar o pagamento. Ele indica se o pagamento foi feito ou não, e então a ação faz as mudanças necessárias no programa.
 
@@ -199,6 +199,11 @@ O fluxo de dados é informado abaixo:
 3. O *RestaurantOperationService* informa qual o preço final da conta.
 4. Ele informa se o cliente pagou ou não a conta.
 5. Chama o método *fechaMesa* com a mesa e se a conta foi paga ou não. Com isso, a mesa é marcada como desocupada e o pedido é removido da mesa.
+
+### VerificarDespensaAction
+
+Ação utilizada pelo gerente, que verifica todos os itens que estão em falta na despensa para o próximo turno.
+É uma ação muito simples, pois o gerente apenas executa uma função, sem nenhum parâmetro, que devolverá um mapa com uma lista de todos os ingredientes que estão faltando na despensa.
 
 ## RestaurantOperationService
 
@@ -309,6 +314,10 @@ Pede ao banco de dados o cardápio do restaurante
 	2. Se for falso, soma o preço aos custos do turno.
 3. Marca a mesa como desocupada, removendo o seu pedido e marcando-a como precisando de limpeza.
 
+### getIngredientesEmFalta
+
+Função que é acionada pelo gerente para devolver um mapa de lista com todos os ingredientes que faltam na despensa para o próximo turno.
+
 ## Database
 
 A base de dados guarda todas as informações históricas do restaurante, além da despensa atual e outras informações estáveis do restaurante, como lista de funcionários, cardápio e mesas.
@@ -354,6 +363,10 @@ Remove da despensa todos os ingredientes de *itensARemover*. Não é possível q
 ### getCardapio
 
 Retorna o cardápio do restaurante
+
+### getFaltaEstoque
+
+Função que é acionada pelo gerente para devolver um mapa de lista com todos os ingredientes que faltam na despensa para o próximo turno.
 
 ## Turno
 
@@ -401,9 +414,9 @@ Retorna o setor alocado para o garçom especificado
 
 Adiciona o valor especificado para a entrada do funcionário no mapa de gorjetas. Na versão atual do programa, apenas garçons e auxiliares de cozinha podem receber gorjetas, mas o método é genérico para permitir mudanças futuras.
 
-### getSalario(funcionario: Funcionario)
+### getFolhaPgto
 
-A partir de um funcionário especificado pelo gerente, essa função devolve um mapa contendo este mesmo funcionário mais o seu respectivo salário (salário + gorjetas ganhas em seu turno).
+Essa função, executada pelo gerente, devolve um mapa contendo um funcionário mais o seu respectivo salário (salário + gorjetas ganhas em seu turno).
 
 ## Pedido
 
