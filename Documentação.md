@@ -161,6 +161,12 @@ O fluxo de dados é informado abaixo:
 2. Se a verificação das mesas é confirmada, é pega a lista de garçons e a lista de setores.
 3. São definidos pelo gerente, através de um mapa, os garçons de cada setor.
 
+###GerarFolhaPgtoAction
+
+Usada pelo gerente, esta ação tem como objetivo gerar a folha de pagamento de todos os funcionários do restaurante.
+Em primeiro lugar, o gerente escolhe o turno cuja folha de pagamento será feita.
+A partir desse turno e a partir do nome de algum funcionário que nele trabalhe, o gerente receberá um mapa contendo o nome de tal funcionário, juntamente com seu respectivo salário (salário + gorjetas ganhas ao longo do turno).
+
 ### IniciarPreparacaoAction
 
 Essa ação é usada pelo cozinheiro quando ele quer começar a preparação de novos itens/pedidos. Ele vê no sistema quais são os itens que ainda não foram atendidos, e então decide qual começar. Ele então informa ao sistema qual o pedido iniciado, além de quais itens ele iniciou (não é necessário iniciar a preparação de todos os itens de um pedido de uma vez).
@@ -390,6 +396,10 @@ Retorna o setor alocado para o garçom especificado
 ### addGorjeta(funcionario: Funcionario, valor: double)
 
 Adiciona o valor especificado para a entrada do funcionário no mapa de gorjetas. Na versão atual do programa, apenas garçons e auxiliares de cozinha podem receber gorjetas, mas o método é genérico para permitir mudanças futuras.
+
+### getSalario(funcionario: Funcionario)
+
+A partir de um funcionário especificado pelo gerente, essa função devolve um mapa contendo este mesmo funcionário mais o seu respectivo salário (salário + gorjetas ganhas em seu turno).
 
 ## Pedido
 
