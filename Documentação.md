@@ -1,5 +1,6 @@
 
 
+
 **Table of Contents**
 
 <!-- Ignorem o HTML embaixo. Ele serve para fazer a tabela de conteúdos -->
@@ -97,12 +98,21 @@ Nenhuma mudança nos dados deve ser feita em *UIAction* ou qualquer de suas subc
 
 Provavelmente a ação mais simples, ela informa ao *RestaurantOperationService*, que por sua vez informa a *RestaurantInterface*, que o usuário deseja fazer logout, e o estado da interface é resetado a como é quando o programa começa.
 
-###FazerRelatorioAction
+### FinalizaTurnoAction
+
+Utilizada pelo gerente, esta ação verifica se todas as mesas estão fechadas, ou seja, com as contas fechadas. Se sim, faz com que o turno ativo vá para a lista de turnos e o mesmo seja retirado do turno ativo.
+
+O fluxo de dados é:
+
+1. A verificação das mesas das mesas fechadas é confirmada ou não.
+2. Se a verificação das mesas é confirmada, é solicitada à base de dados que o atual turno vá para a lista de turnos e o turno ativo receba NULL.
+
+
+### FazerRelatorioAction
 
 Utilizada apenas pelo gerente, esta ação irá fazer o relatório dos lucros e das despesas de um determinado turno.
-Inicialmente, o gerente pega o lucro inteiro, ou seja, aquele que o restaurante adquiriu no total e não em um determinado turno.
-Em seguida, ele escolhe o turno desejado e, a partir dele, seleciona os lucros daquele turno em si.
-O mesmo ocorre para as despesas: O gerente pega as despesas totais e, depois de escolher o turno, pega só aquelas que dizem respeito ao mesmo.
+Inicialmente, o gerente escolhe o turno que deseja.
+Em seguida, ele pega o total de despesas e lucro do turno escolhido e cria um relatório com os valores obtidos.
 
 ### SentaClienteAction
 
@@ -151,6 +161,12 @@ O fluxo de dados é informado abaixo:
 2. Se a verificação das mesas é confirmada, é pega a lista de garçons e a lista de setores.
 3. São definidos pelo gerente, através de um mapa, os garçons de cada setor.
 
+###GerarFolhaPgtoAction
+
+Usada pelo gerente, esta ação tem como objetivo gerar a folha de pagamento de todos os funcionários do restaurante.
+Em primeiro lugar, o gerente escolhe o turno cuja folha de pagamento será feita.
+A partir desse turno, o gerente receberá um mapa contendo um funcionário, juntamente com seu respectivo salário (salário + gorjetas ganhas ao longo do turno).
+
 ### IniciarPreparacaoAction
 
 Essa ação é usada pelo cozinheiro quando ele quer começar a preparação de novos itens/pedidos. Ele vê no sistema quais são os itens que ainda não foram atendidos, e então decide qual começar. Ele então informa ao sistema qual o pedido iniciado, além de quais itens ele iniciou (não é necessário iniciar a preparação de todos os itens de um pedido de uma vez).
@@ -162,7 +178,7 @@ O fluxo de dados é informado abaixo:
 
 *Sugestão de implementação:* para a escolha dos itens, primeiro mostre todos os pedidos pendentes para o usuário. Depois, quando ele escolher qual pedido vai preparar, mostre quais os itens desse pedido que estão pendentes. Assim, fica fácil criar os parâmetros necessários para a chamada de método de *RestaurantOperationService*. 
 
-## AtendeMesaAction
+### AtendeMesaAction
 
 É usada por um garçom para registrar os pedidos de uma mesa. Ao chamar a ação, ele vê uma lista de todas as mesas que podem ser atendidas por ele, sejam elas as que não têm nenhum pedido e estão em seu setor, seja as que já têm um pedido feito por ele. Com essas mesas visíveis, ele escolhe a mesa que deseja atender e recebe um cardápio para marcar quais itens adicionar ao pedido da mesa. Quando ele confirma os itens adicionados, o pedido da mesa é atualizado.
 
@@ -174,7 +190,7 @@ O fluxo de dados é informado abaixo:
 6. 
 7. Service* para informar o novo pedido da mesa. (Caso a mesa já possua um pedido, isso será lidado por *criaPedido*)
 
-## FechaMesaAction
+### FechaMesaAction
 
 É usada pelo garçom responsável por uma mesa para indicar que o cliente fechou a conta. O garçom é mostrado uma lista de mesas que ele está atendendo, e ele escolhe qual mesa fechou a conta. Com isso feito, é mostrado a ele o preço total do pedido, com opção de aceitar ou rejeitar o pagamento. Ele indica se o pagamento foi feito ou não, e então a ação faz as mudanças necessárias no programa.
 
@@ -184,9 +200,22 @@ O fluxo de dados é informado abaixo:
 4. Ele informa se o cliente pagou ou não a conta.
 5. Chama o método *fechaMesa* com a mesa e se a conta foi paga ou não. Com isso, a mesa é marcada como desocupada e o pedido é removido da mesa.
 
+### VerificarDespensaAction
+
+Ação utilizada pelo gerente, que verifica todos os itens que estão em falta na despensa para o próximo turno.
+É uma ação muito simples, pois o gerente apenas executa uma função, sem nenhum parâmetro, que devolverá um mapa com uma lista de todos os ingredientes que estão faltando na despensa.
+
 ## RestaurantOperationService
 
 Gerencia a comunicação entre as ações, que lidam com a obtenção e display de informações ao usuário, e os dados propriamente ditos.
+
+### verificaMesasFechada
+
+Retorna um booleano correspondente à pergunta: Todas as mesas estão fechadas, ou seja, não há nenhuma mesa com a conta aberta?
+
+### retirarTurnoAtivo
+
+Solicita à base de dados que retire o turno atual do turno ativo e o adicione à lista de turnos.
 
 ### verificaMesasLiberadas: 
 
@@ -196,17 +225,13 @@ Solicita à base de dados um booleano para a pergunta: Todas as mesas estão lib
 
 Solicita ao Turno a relação dos garçons daquele turno. Retorna uma lista de garçons.
 
+### getTurno
+
+Função utilizada para devolver todos os turnos do restaurante para que o gerente escolha em qual necessita operar.
+
 ### getSetores:
 
 Solicita à base de dados a relação dos setores. Retorna uma lista de setores.
-
-### getLucros:
-
-Recebe o valor total de lucro obtido em todos os turnos do restaurante.
-
-### getDespesas:
-
-Recebe o valor total de custo/despesa obtido em todos os turnos do restaurante.
 
 ### setGarconsSetor(MapSetorGarcons : Map<List<Garcom>,Setor>):
 
@@ -289,9 +314,17 @@ Pede ao banco de dados o cardápio do restaurante
 	2. Se for falso, soma o preço aos custos do turno.
 3. Marca a mesa como desocupada, removendo o seu pedido e marcando-a como precisando de limpeza.
 
+### getIngredientesEmFalta
+
+Função que é acionada pelo gerente para devolver um mapa de lista com todos os ingredientes que faltam na despensa para o próximo turno.
+
 ## Database
 
 A base de dados guarda todas as informações históricas do restaurante, além da despensa atual e outras informações estáveis do restaurante, como lista de funcionários, cardápio e mesas.
+
+### armazenaTurnoAtivo( turno: Turno)
+
+Retira o turno atual do turno ativo e o adiciona à lista de turnos.
 
 ### getSetores
 
@@ -307,7 +340,7 @@ Retorna, em condições normais, o turno atual do restaurante. Se não houver um
 
 Esse comportamento serve para impedir ações que precisam de turno de acontecerem quando não há um turno ativo. 
 
-### getTodosTurnos
+### getTurno
 
 Retorna uma lista de todos os turnos do restaurante para que o gerente selecione aquele que quer no momento.
 
@@ -330,6 +363,10 @@ Remove da despensa todos os ingredientes de *itensARemover*. Não é possível q
 ### getCardapio
 
 Retorna o cardápio do restaurante
+
+### getFaltaEstoque
+
+Função que é acionada pelo gerente para devolver um mapa de lista com todos os ingredientes que faltam na despensa para o próximo turno.
 
 ## Turno
 
@@ -377,6 +414,10 @@ Retorna o setor alocado para o garçom especificado
 
 Adiciona o valor especificado para a entrada do funcionário no mapa de gorjetas. Na versão atual do programa, apenas garçons e auxiliares de cozinha podem receber gorjetas, mas o método é genérico para permitir mudanças futuras.
 
+### getFolhaPgto
+
+Essa função, executada pelo gerente, devolve um mapa contendo um funcionário mais o seu respectivo salário (salário + gorjetas ganhas em seu turno).
+
 ## Pedido
 
 Guarda as informações sobre o pedido de uma mesa. Uma mesa não pode conter mais de um pedido. Ele contém um mapa relacionando seus itens com o estado de preparação de cada um. Além disso, ele possui um atributo indicando seu estado de preparação e o garçom responsável pelo pedido.
@@ -421,3 +462,8 @@ Passa o valor de ocupada para falso, e o valor de limpa para falso. Além disso,
 
 1. Caso possua uma reserva feita para um horário que viola o intervalo de tolerância definido, a reserva é cancelada.
 2. Retorna verdadeiro se ela está desocupada, limpa e não possui uma reserva feita. 
+
+> Written with [StackEdit](https://stackedit.io/).
+
+
+> Written with [StackEdit](https://stackedit.io/).
