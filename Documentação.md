@@ -432,7 +432,7 @@ Recebe um pedido e adiciona os itens desse pedido à lista de itens. Cada item d
 
 ### addItem(item: Item)
 
-Cria um novo *ItemPedido*, com o item especificado e estado PENDENTE. Depois, analisa o *item* o coloca na ordem adequada na lista, seguindo as especificações do trabalho.
+Cria um novo *ItemPedido*, com o item especificado e estado PENDENTE. Depois, analisa o *item* o coloca na ordem adequada na lista, seguindo as especificações do trabalho. A ordem é a seguinte: primeiro itens da entrada, seguidos dos outros itens ordenados pelo tempo de preparação, com os mais demorados antes.
 
 ### getPreço
 
@@ -448,7 +448,11 @@ Guarda todas as informações relativas a um item do cardápio. Elas são: categ
 
 ## Receita
 
+Possui um mapa de ingredientes e suas quantidades, além de uma string para os passos de preparação.
+
 ## Ingrediente
+
+Representa um possível ingrediente para uma receita.
 
 ## Mesa
 
